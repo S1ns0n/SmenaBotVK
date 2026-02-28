@@ -1,0 +1,38 @@
+from vkbottle import Keyboard, KeyboardButtonColor, Text
+
+goal1_kb = Keyboard(inline=False)
+goal1_kb.add(Text("Да"), color=KeyboardButtonColor.PRIMARY)
+goal1_kb.row()
+goal1_kb.add(Text("Нет"), color=KeyboardButtonColor.NEGATIVE)
+goal1_kb.row()
+goal1_kb.add(Text("Затрудняюсь ответить"), color=KeyboardButtonColor.SECONDARY)
+
+goal2_kb = Keyboard(inline=False)
+goal2_kb.add(Text("Цель"), color=KeyboardButtonColor.PRIMARY)
+goal2_kb.row()
+goal2_kb.add(Text("Мечта"), color=KeyboardButtonColor.PRIMARY)
+goal2_kb.row()
+goal2_kb.add(Text("Затрудняюсь ответить"), color=KeyboardButtonColor.SECONDARY)
+goal2_kb.row()
+goal2_kb.add(Text("Это одно и то же"), color=KeyboardButtonColor.SECONDARY)
+
+future_kb = Keyboard(inline=False)
+future_kb.add(Text("1. Надеюсь, что все само собой устроится"), color=KeyboardButtonColor.SECONDARY)
+future_kb.row()
+future_kb.add(Text("2. Боюсь неизвестности"), color=KeyboardButtonColor.NEGATIVE)
+future_kb.row()
+future_kb.add(Text("3. Будущее - поле возможностей"), color=KeyboardButtonColor.PRIMARY)
+
+yesno_kb = Keyboard(inline=False)
+yesno_kb.add(Text("Да"), color=KeyboardButtonColor.PRIMARY)
+yesno_kb.row()
+yesno_kb.add(Text("Нет"), color=KeyboardButtonColor.NEGATIVE)
+yesno_kb.row()
+yesno_kb.add(Text("Затрудняюсь ответить"), color=KeyboardButtonColor.SECONDARY)
+
+mentor_kb = Keyboard(inline=False)
+mentor_kb.add(Text("Да, я уже у него учусь"), color=KeyboardButtonColor.POSITIVE)
+mentor_kb.row()
+mentor_kb.add(Text("Да, но он не может мне помочь"), color=KeyboardButtonColor.SECONDARY)
+mentor_kb.row()
+mentor_kb.add(Text("Нет"), color=KeyboardButtonColor.NEGATIVE)
