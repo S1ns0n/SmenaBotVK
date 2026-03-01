@@ -114,7 +114,6 @@ async def projects_process(message: Message):
     projects = message.text.strip()
     ctx_storage.set(FirstAnketaState.PROJECTS, projects)
 
-    # ✅ Вопросы = ключи в БД!
     anketa_data = {
         QUESTIONS_SECTION1[FirstAnketaState.INTERESTS]: ctx_storage.get(FirstAnketaState.INTERESTS),
         QUESTIONS_SECTION1[FirstAnketaState.PROFESSION]: ctx_storage.get(FirstAnketaState.PROFESSION),
@@ -132,7 +131,6 @@ async def projects_process(message: Message):
 
     user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa1")
 
-    # ✅ Показываем с вопросами как заголовками
     result = f"""✓ Анкета успешно заполнена!
 
 Раздел 2. Профессиональное самоопределение:
