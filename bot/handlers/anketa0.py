@@ -15,67 +15,72 @@ class ZeroAnketaState(BaseStateGroup):
     SCHOOL = "school"
 
 
+QUESTIONS_SECTION0 = {
+    ZeroAnketaState.FIO: "Укажите ваше полное ФИО",
+    ZeroAnketaState.SEX: "Укажите ваш пол (мужской/женский)",
+    ZeroAnketaState.AGE: "Укажите ваш возраст",
+    ZeroAnketaState.SCHOOL: "Укажите вашу школу, колледж или лицей"
+}
+
+
 @labeler.message(text="анкета0")
 async def start_handler(message: Message):
     if await db_manager.has_user_anketa(peer_id=message.peer_id, anketa_type="anketa0"):
         await message.answer("Вы уже прошли анкету")
         return
 
-
     await message.answer("Привет! Давай заполним анкету.\n\nРаздел 1. Персональные данные", keyboard=empty_kb)
-    await message.answer("1. Укажите ваше полное ФИО")
+    await message.answer("1. " + QUESTIONS_SECTION0[ZeroAnketaState.FIO])
     await state_dispanser.set(message.peer_id, ZeroAnketaState.FIO)
 
 
 @labeler.message(state=ZeroAnketaState.FIO)
 async def fio_process(message: Message):
     fio = message.text.strip()
-    ctx_storage.set("fio", fio)
-    await message.answer("2. Укажите ваш пол", keyboard=sex_kb)
+    ctx_storage.set(ZeroAnketaState.FIO, fio)  # ✅ Ключ = состояние
+    await message.answer("2. " + QUESTIONS_SECTION0[ZeroAnketaState.SEX], keyboard=sex_kb)
     await state_dispanser.set(message.peer_id, ZeroAnketaState.SEX)
 
 
 @labeler.message(state=ZeroAnketaState.SEX)
 async def sex_process(message: Message):
     sex = message.text.strip().lower()
-    ctx_storage.set("sex", sex)
-    await message.answer("3. Укажите ваш возраст", keyboard=empty_kb)
+    ctx_storage.set(ZeroAnketaState.SEX, sex)
+    await message.answer("3. " + QUESTIONS_SECTION0[ZeroAnketaState.AGE], keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, ZeroAnketaState.AGE)
 
 
 @labeler.message(state=ZeroAnketaState.AGE)
 async def age_process(message: Message):
     age = message.text.strip()
-    ctx_storage.set("age", age)
-    await message.answer("4. Укажите вашу школу, колледж или лицей")
+    ctx_storage.set(ZeroAnketaState.AGE, age)
+    await message.answer("4. " + QUESTIONS_SECTION0[ZeroAnketaState.SCHOOL])
     await state_dispanser.set(message.peer_id, ZeroAnketaState.SCHOOL)
 
 
 @labeler.message(state=ZeroAnketaState.SCHOOL)
 async def school_process(message: Message):
     school = message.text.strip()
-    ctx_storage.set("school", school)
+    ctx_storage.set(ZeroAnketaState.SCHOOL, school)
 
+    # ✅ Вопросы = ключи в БД!
     anketa_data = {
-        "fio": ctx_storage.get("fio"),
-        "sex": ctx_storage.get("sex"),
-        "age": ctx_storage.get("age"),
-        "school": school
+        QUESTIONS_SECTION0[ZeroAnketaState.FIO]: ctx_storage.get(ZeroAnketaState.FIO),
+        QUESTIONS_SECTION0[ZeroAnketaState.SEX]: ctx_storage.get(ZeroAnketaState.SEX),
+        QUESTIONS_SECTION0[ZeroAnketaState.AGE]: ctx_storage.get(ZeroAnketaState.AGE),
+        QUESTIONS_SECTION0[ZeroAnketaState.SCHOOL]: school
     }
 
-    await db_manager.save_anketa(peer_id=message.peer_id,
-                                 anketa_type="anketa0",
-                                 data=anketa_data)
-    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id,
-                                     anketa_type="anketa0")
+    await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa0", data=anketa_data)
 
+    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa0")
+
+    # ✅ Показываем с вопросами
     result = f"""✓ Анкета успешно заполнена!
 
 Раздел 1. Персональные данные:
-• ФИО: {user_anketa['fio']}
-• Пол: {user_anketa['sex'].capitalize()}
-• Возраст: {user_anketa['age']} лет  
-• Образование: {user_anketa['school']}"""
-
+"""
+    for question, answer in user_anketa.items():
+        result += f"• {question}: {answer}\n"
     await message.answer(result)
     await state_dispanser.delete(message.peer_id)
