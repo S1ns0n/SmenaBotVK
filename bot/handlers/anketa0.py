@@ -1,8 +1,11 @@
+import asyncio
+
 from bot.labeler_config import labeler, state_dispanser, ctx_storage
 from vkbottle.bot import Message
 from vkbottle import BaseStateGroup
 from bot.keyboards.anketa0_kb import sex_kb
 from bot.keyboards import empty_kb
+from database import db_manager
 
 
 class FirstAnketaState(BaseStateGroup):
@@ -49,7 +52,6 @@ async def school_process(message: Message):
     school = message.text.strip()
     ctx_storage.set("school", school)
 
-    # Собираем все данные анкеты
     anketa_data = {
         "fio": ctx_storage.get("fio"),
         "sex": ctx_storage.get("sex"),
@@ -57,16 +59,19 @@ async def school_process(message: Message):
         "school": school
     }
 
-    # Показываем итоговую анкету
+    await db_manager.save_anketa(peer_id=message.peer_id,
+                                 anketa_type="anketa1",
+                                 data=anketa_data)
+    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id,
+                                     anketa_type="anketa1")
+
     result = f"""✓ Анкета успешно заполнена!
 
 Раздел 1. Персональные данные:
-• ФИО: {anketa_data['fio']}
-• Пол: {anketa_data['sex'].capitalize()}
-• Возраст: {anketa_data['age']} лет  
-• Образование: {anketa_data['school']}"""
+• ФИО: {user_anketa['fio']}
+• Пол: {user_anketa['sex'].capitalize()}
+• Возраст: {user_anketa['age']} лет  
+• Образование: {user_anketa['school']}"""
 
     await message.answer(result)
-
-    # Сбрасываем состояние и данные
     await state_dispanser.delete(message.peer_id)
