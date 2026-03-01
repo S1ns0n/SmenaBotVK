@@ -45,21 +45,21 @@ async def profession_process(message: Message):
 @anketa1_labeler.message(state=SecondAnketaState.PARENTS)
 async def parents_process(message: Message):
     ctx_storage.set("parents", message.text.strip())
-    await message.answer("4. Какие плоды ты создаешь уже сегодня? Пример: картины, игры, мероприятия")
+    await message.answer("4. Какие плоды (продукты своей деятельности. Пример: картины, игры, мероприятия) ты создаешь уже сегодня)? Перечисли не менее 3")
     await state_dispanser.set(message.peer_id, SecondAnketaState.FRUITS)
 
 
 @anketa1_labeler.message(state=SecondAnketaState.FRUITS)
 async def fruits_process(message: Message):
     ctx_storage.set("fruits", message.text.strip())
-    await message.answer("5. Какие эффекты от создаваемых тобой плодов?")
+    await message.answer("5. Какие эффекты (последствия, количественные и качественные результаты, впечатления у других людей. Пример: больше подростков интересуются БПЛА, родители испытывают гордость и радость) есть от создаваемых тобой плодов? ")
     await state_dispanser.set(message.peer_id, SecondAnketaState.EFFECTS)
 
 
 @anketa1_labeler.message(state=SecondAnketaState.EFFECTS)
 async def effects_process(message: Message):
     ctx_storage.set("effects", message.text.strip())
-    await message.answer("6. Перечисли 5-7 групп людей или живых существ, для пользы которых тебе интересно трудиться")
+    await message.answer("6. Перечисли 5-7 групп людей или живых существ, для пользы которых тебе интересно трудиться/которым интересно помогать? Пример: родители/врачи/молодые предприниматели/бездомные собаки")
     await state_dispanser.set(message.peer_id, SecondAnketaState.GROUPS)
 
 
@@ -67,7 +67,7 @@ async def effects_process(message: Message):
 async def groups_process(message: Message):
     ctx_storage.set("groups", message.text.strip())
     await message.answer(
-        "7. Расставь дела в порядке ОТ МЕНЕЕ интересного К БОЛЕЕ интересному:\n-Физическая активность\n-Общение\n-Уход за животными и растениями\n-Решение логических задач и планирование\n-Выступление на публике\n-Размышление о том, как устроен мир\n-Рефлексия\n-Наблюдение за красотой мира и создание творческих результатов")
+        "7. Расставь дела в порядке ОТ МЕНЕЕ интересного и увлекательного К БОЛЕЕ интересному и увлекательному:\n-Физическая активность\n-Общение\n-Уход за животными и растениями\n-Решение логических задач и планирование\n-Выступление на публике\n-Размышление о том, как устроен мир\n-Рефлексия\n-Наблюдение за красотой мира и создание творческих результатов")
     await state_dispanser.set(message.peer_id, SecondAnketaState.ACTIVITIES)
 
 
