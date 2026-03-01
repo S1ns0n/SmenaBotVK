@@ -23,9 +23,13 @@ QUESTIONS_SECTION0 = {
     ZeroAnketaState.SCHOOL: "Укажите вашу школу, колледж или лицей"
 }
 
+@labeler.message(text="очистка")
+async def clear_all_anktets(message: Message):
+    await db_manager.delete_user_anketas(peer_id=message.peer_id)
+    await message.answer("Очищено!")
 @labeler.message(text="анализ")
 async def analyze(message: Message):
-    await message.answer("🔄 Анализирую ваши анкеты...")
+    await message.answer("Анализирую ваши анкеты...")
 
     result = await analyzer.analyze_peer_anketas(message.peer_id)
     await message.answer(result)
