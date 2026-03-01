@@ -1,3 +1,3 @@
-from database.database import TinyDBManager
+from database.database import AsyncTinyDBManager
 
-db_manager = TinyDBManager("anketas.json")
+db_manager = AsyncTinyDBManager("anketas.json")
