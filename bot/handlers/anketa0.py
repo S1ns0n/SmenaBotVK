@@ -6,6 +6,7 @@ from vkbottle import BaseStateGroup
 from bot.keyboards.anketa0_kb import sex_kb
 from bot.keyboards import empty_kb
 from database import db_manager
+from ai import analyzer
 
 
 class ZeroAnketaState(BaseStateGroup):
@@ -22,7 +23,12 @@ QUESTIONS_SECTION0 = {
     ZeroAnketaState.SCHOOL: "Укажите вашу школу, колледж или лицей"
 }
 
+@labeler.message(text="анализ")
+async def analyze(message: Message):
+    await message.answer("🔄 Анализирую ваши анкеты...")
 
+    result = await analyzer.analyze_peer_anketas(message.peer_id)
+    await message.answer(result)
 @labeler.message(text="анкета0")
 async def start_handler(message: Message):
     if await db_manager.has_user_anketa(peer_id=message.peer_id, anketa_type="anketa0"):
