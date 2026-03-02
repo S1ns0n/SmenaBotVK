@@ -1,12 +1,11 @@
-from bot.labeler_config import labeler, state_dispanser, ctx_storage
-from vkbottle.bot import Message
+from bot.labeler_config import state_dispanser, ctx_storage
+from vkbottle.bot import Message, BotLabeler
 from vkbottle import BaseStateGroup
 from bot.keyboards.anketa0_kb import sex_kb
 from bot.keyboards import empty_kb
 from database import db_manager
-from ai import analyzer
 
-
+anketa0_labeler = BotLabeler()
 class ZeroAnketaState(BaseStateGroup):
     FIO = "fio"
     SEX = "sex"
@@ -21,17 +20,7 @@ QUESTIONS_SECTION0 = {
     ZeroAnketaState.SCHOOL: "Укажите вашу школу, колледж или лицей"
 }
 
-@labeler.message(text="очистка")
-async def clear_all_anktets(message: Message):
-    await db_manager.delete_user_anketas(peer_id=message.peer_id)
-    await message.answer("Очищено!")
-@labeler.message(text="анализ")
-async def analyze(message: Message):
-    await message.answer("Анализирую ваши анкеты...")
-
-    result = await analyzer.analyze_peer_anketas(message.peer_id)
-    await message.answer(result)
-@labeler.message(text="анкета0")
+@anketa0_labeler.message(text="анкета0")
 async def start_handler(message: Message):
     if await db_manager.has_user_anketa(peer_id=message.peer_id, anketa_type="anketa0"):
         await message.answer("Вы уже прошли анкету")
@@ -42,15 +31,15 @@ async def start_handler(message: Message):
     await state_dispanser.set(message.peer_id, ZeroAnketaState.FIO)
 
 
-@labeler.message(state=ZeroAnketaState.FIO)
+@anketa0_labeler.message(state=ZeroAnketaState.FIO)
 async def fio_process(message: Message):
     fio = message.text.strip()
-    ctx_storage.set(ZeroAnketaState.FIO, fio)  # ✅ Ключ = состояние
+    ctx_storage.set(ZeroAnketaState.FIO, fio)
     await message.answer("2. " + QUESTIONS_SECTION0[ZeroAnketaState.SEX], keyboard=sex_kb)
     await state_dispanser.set(message.peer_id, ZeroAnketaState.SEX)
 
 
-@labeler.message(state=ZeroAnketaState.SEX)
+@anketa0_labeler.message(state=ZeroAnketaState.SEX)
 async def sex_process(message: Message):
     sex = message.text.strip().lower()
     ctx_storage.set(ZeroAnketaState.SEX, sex)
@@ -58,7 +47,7 @@ async def sex_process(message: Message):
     await state_dispanser.set(message.peer_id, ZeroAnketaState.AGE)
 
 
-@labeler.message(state=ZeroAnketaState.AGE)
+@anketa0_labeler.message(state=ZeroAnketaState.AGE)
 async def age_process(message: Message):
     age = message.text.strip()
     ctx_storage.set(ZeroAnketaState.AGE, age)
@@ -66,7 +55,7 @@ async def age_process(message: Message):
     await state_dispanser.set(message.peer_id, ZeroAnketaState.SCHOOL)
 
 
-@labeler.message(state=ZeroAnketaState.SCHOOL)
+@anketa0_labeler.message(state=ZeroAnketaState.SCHOOL)
 async def school_process(message: Message):
     school = message.text.strip()
     ctx_storage.set(ZeroAnketaState.SCHOOL, school)
