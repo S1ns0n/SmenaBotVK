@@ -1,5 +1,3 @@
-import asyncio
-
 from bot.labeler_config import labeler, state_dispanser, ctx_storage
 from vkbottle.bot import Message
 from vkbottle import BaseStateGroup
@@ -73,7 +71,6 @@ async def school_process(message: Message):
     school = message.text.strip()
     ctx_storage.set(ZeroAnketaState.SCHOOL, school)
 
-    # ✅ Вопросы = ключи в БД!
     anketa_data = {
         QUESTIONS_SECTION0[ZeroAnketaState.FIO]: ctx_storage.get(ZeroAnketaState.FIO),
         QUESTIONS_SECTION0[ZeroAnketaState.SEX]: ctx_storage.get(ZeroAnketaState.SEX),
@@ -85,7 +82,6 @@ async def school_process(message: Message):
 
     user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa0")
 
-    # ✅ Показываем с вопросами
     result = f"""✓ Анкета успешно заполнена!
 
 Раздел 1. Персональные данные:
