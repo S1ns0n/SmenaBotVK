@@ -139,9 +139,9 @@ async def q11_process(message: Message):
         QUESTIONS_SECTION3[ThirdAnketaState.VALUES]: q11_answer
     }
 
-    await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa4", data=anketa_data)
+    await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa3", data=anketa_data)
 
-    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa4")
+    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa3")
 
     result = f"""✓ Анкета успешно заполнена!
 
