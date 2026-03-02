@@ -39,7 +39,7 @@ QUESTIONS_SECTION3 = {
 
 
 @anketa3_labeler.message(text="анкета3")
-async def anketa4_start(message: Message):
+async def anketa3_start(message: Message):
     if await db_manager.has_user_anketa(peer_id=message.peer_id, anketa_type="anketa3"):
         await message.answer("Вы уже прошли эту анкету")
         return

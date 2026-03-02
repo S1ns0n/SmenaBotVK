@@ -21,7 +21,7 @@ QUESTIONS_SECTION0 = {
 }
 
 @anketa0_labeler.message(text="анкета0")
-async def start_handler(message: Message):
+async def anketa0_start(message: Message):
     if await db_manager.has_user_anketa(peer_id=message.peer_id, anketa_type="anketa0"):
         await message.answer("Вы уже прошли анкету")
         return
