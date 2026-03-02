@@ -1,4 +1,3 @@
-# ai_analyzer.py (УПРОЩЁННАЯ версия — вопросы в ключах!)
 from openai import OpenAI
 from typing import Dict, Optional
 from database import db_manager
@@ -22,14 +21,12 @@ class AnketAnalyzer:
             if not any([anketa0_data, anketa1_data, anketa2_data]):
                 return "❌ Заполните хотя бы одну анкету для анализа."
 
-            # Формируем промт: ВОПРОСЫ + ОТВЕТЫ
             prompt = self._build_prompt({
                 "Раздел 1. Персональные данные": anketa0_data,
                 "Раздел 2. Профессиональное самоопределение": anketa1_data,
                 "Раздел 3. Мечта и путь к ней": anketa2_data
             })
 
-            # Получаем анализ от GPT
             response = await self._get_ai_analysis(prompt)
             return response
 
@@ -41,16 +38,16 @@ class AnketAnalyzer:
         prompt_parts = ["📋 АНКЕТА ПРОФОРИЕНТАЦИИ\n\n"]
 
         for section_name, data in anketas_data.items():
-            if data:  # Только заполненные разделы
+            if data:
                 prompt_parts.append(f"📂 {section_name}")
                 prompt_parts.append("=" * 50)
 
                 for question, answer in data.items():
                     prompt_parts.append(f"❓ {question}")
                     prompt_parts.append(f"💬 {answer}")
-                    prompt_parts.append("")  # Пустая строка для читаемости
+                    prompt_parts.append("")
 
-                prompt_parts.append("")  # Разделитель между секциями
+                prompt_parts.append("")
 
         full_data = "\n".join(prompt_parts)
 
@@ -100,11 +97,7 @@ class AnketAnalyzer:
                 {"role": "user", "content": prompt}
             ],
             max_tokens=1000,
-            temperature=0.2  # Минимум креативности для точности
+            temperature=0.2
         )
 
         return response.choices[0].message.content
-
-
-# Глобальный экземпляр
-
