@@ -5,6 +5,7 @@ from vkbottle import BaseStateGroup
 from bot.keyboards import empty_kb
 from bot.keyboards.anketa1_kb import choice_kb, projects_kb
 from database import db_manager
+from bot.handlers.anketa2 import anketa2_start
 
 anketa1_labeler = BotLabeler()
 
@@ -128,18 +129,8 @@ async def projects_process(message: Message):
     }
 
     await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa1", data=anketa_data)
-
-    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa1")
-
-    result = f"""✓ Анкета успешно заполнена!
-
-Раздел 2. Профессиональное самоопределение:
-"""
-    for question, answer in user_anketa.items():
-        result += f"• {question}: {answer}\n"
-
-    await message.answer(result, keyboard=empty_kb)
     await state_dispanser.delete(message.peer_id)
+    await anketa2_start(message=message)
 
 
 

@@ -4,6 +4,7 @@ from vkbottle import BaseStateGroup
 from bot.keyboards.anketa0_kb import sex_kb
 from bot.keyboards import empty_kb
 from database import db_manager
+from bot.handlers.anketa1 import anketa1_start
 
 anketa0_labeler = BotLabeler()
 class ZeroAnketaState(BaseStateGroup):
@@ -68,14 +69,7 @@ async def school_process(message: Message):
     }
 
     await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa0", data=anketa_data)
-
-    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa0")
-
-    result = f"""✓ Анкета успешно заполнена!
-
-Раздел 1. Персональные данные:
-"""
-    for question, answer in user_anketa.items():
-        result += f"• {question}: {answer}\n"
-    await message.answer(result)
     await state_dispanser.delete(message.peer_id)
+    await anketa1_start(message=message)
+
+

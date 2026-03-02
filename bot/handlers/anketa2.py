@@ -5,6 +5,7 @@ from vkbottle import BaseStateGroup
 from bot.keyboards import empty_kb
 from bot.keyboards.anketa2_kb import goal1_kb, goal2_kb, future_kb, yesno_kb, mentor_kb
 from database import db_manager
+from bot.handlers.anketa3 import anketa3_start
 
 
 anketa2_labeler = BotLabeler()
@@ -98,16 +99,6 @@ async def mentor_process(message: Message):
     }
 
     await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa2", data=anketa_data)
-
-    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa2")
-
-    result = f"""✓ Анкета успешно заполнена!
-
-Раздел 3. Мечта и путь к ней:
-"""
-    for question, answer in user_anketa.items():
-        result += f"• {question}: {answer}\n"
-
-    await message.answer(result, keyboard=empty_kb)
     await state_dispanser.delete(message.peer_id)
+    await anketa3_start(message=message)
 

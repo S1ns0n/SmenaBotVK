@@ -5,7 +5,7 @@ from vkbottle import BaseStateGroup
 from bot.keyboards import empty_kb
 from bot.keyboards.anketa3_kb import create_numbered_keyboard
 from database import db_manager
-
+from ai import analyzer
 
 anketa3_labeler = BotLabeler()
 
@@ -140,16 +140,8 @@ async def q11_process(message: Message):
     }
 
     await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa3", data=anketa_data)
-
-    user_anketa = await db_manager.get_anketa_data(peer_id=message.peer_id, anketa_type="anketa3")
-
-    result = f"""✓ Анкета успешно заполнена!
-
-Раздел 4. Модель героя-созидателя:
-"""
-    for question, answer in user_anketa.items():
-        short_question = question[:50] + "..." if len(question) > 50 else question
-        result += f"• {short_question}: {answer}\n"
-
-    await message.answer(result, keyboard=empty_kb)
     await state_dispanser.delete(message.peer_id)
+
+    await message.answer("Анализирую ваши анкеты...")
+    result = await analyzer.analyze_peer_anketas(message.peer_id)
+    await message.answer(result, keyboard=empty_kb)
