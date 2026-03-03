@@ -3,7 +3,7 @@ from bot.labeler_config import state_dispanser, ctx_storage
 from vkbottle.bot import Message
 from vkbottle import BaseStateGroup
 from bot.keyboards import empty_kb
-from bot.keyboards.anketa1_kb import choice_kb, projects_kb
+from bot.keyboards.anketa1_kb import choice_kb, projects_kb, parent_kb
 from database import db_manager
 from bot.handlers.anketa2 import anketa2_start
 from bot.utils import remove_brackets_text
@@ -58,14 +58,14 @@ async def interests_process(message: Message):
 @anketa1_labeler.message(state=FirstAnketaState.PROFESSION)
 async def profession_process(message: Message):
     ctx_storage.set(FirstAnketaState.PROFESSION, message.text.strip())
-    await message.answer("3. " + remove_brackets_text(QUESTIONS_SECTION1[FirstAnketaState.PARENTS]))
+    await message.answer("3. " + remove_brackets_text(QUESTIONS_SECTION1[FirstAnketaState.PARENTS]), keyboard=parent_kb)
     await state_dispanser.set(message.peer_id, FirstAnketaState.PARENTS)
 
 
 @anketa1_labeler.message(state=FirstAnketaState.PARENTS)
 async def parents_process(message: Message):
     ctx_storage.set(FirstAnketaState.PARENTS, message.text.strip())
-    await message.answer("4. " + remove_brackets_text(QUESTIONS_SECTION1[FirstAnketaState.FRUITS]))
+    await message.answer("4. " + remove_brackets_text(QUESTIONS_SECTION1[FirstAnketaState.FRUITS]), keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, FirstAnketaState.FRUITS)
 
 
