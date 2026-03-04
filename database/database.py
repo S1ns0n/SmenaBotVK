@@ -1,5 +1,5 @@
 import asyncio
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Set
 from datetime import datetime
 from tinydb import TinyDB, Query
 
@@ -71,6 +71,16 @@ class AsyncTinyDBManager:
         """Удалить анкеты"""
         db = await self._get_db()
         db.remove(self.Anketa.peer_id == peer_id)
+
+    async def get_all_users(self) -> Set[int]:
+        """
+        Достаёт список всех пользователей, которые есть в базе.
+        Возвращает множество уникальных peer_id.
+        """
+        db = await self._get_db()
+        all_records = db.all()
+        users = {record["peer_id"] for record in all_records if "peer_id" in record}
+        return users
 
     async def close(self):
         if self._db:
