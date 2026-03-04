@@ -145,5 +145,5 @@ async def q11_process(message: Message):
 
     await message.answer("Анализирую ваши анкеты...", keyboard=empty_kb)
     result = await analyzer.analyze_peer_anketas(message.peer_id)
-    await db_manager.save_ai_answer(result)
+    await db_manager.save_ai_answer(peer_id=message.peer_id, ai_answer_type="first_anketas", ai_answer=result)
     await message.answer(result)
