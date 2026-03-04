@@ -27,8 +27,7 @@ async def anketa0_start(message: Message):
         await message.answer("Вы уже прошли анкету")
         return
 
-    await message.answer("Привет! Давай заполним анкету.\n\nРаздел 1. Персональные данные", keyboard=empty_kb)
-    await message.answer("1. " + QUESTIONS_SECTION0[ZeroAnketaState.FIO])
+    await message.answer("1. " + QUESTIONS_SECTION0[ZeroAnketaState.FIO],keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, ZeroAnketaState.FIO)
 
 
