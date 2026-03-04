@@ -19,7 +19,7 @@ class AsyncTinyDBManager:
             return self._db
 
     async def save_anketa(self, peer_id: int, anketa_type: str, data: Dict[str, Any]) -> bool:
-        """✅ АСИНХРОННО сохраняет анкету"""
+        """сохраняет анкету"""
         doc = {
             "peer_id": peer_id,
             "anketa_type": anketa_type,
@@ -32,33 +32,32 @@ class AsyncTinyDBManager:
         return True
 
     async def get_user_anketas(self, peer_id: int) -> List[Dict]:
-        """✅ Все анкеты пользователя"""
+        """Все анкеты пользователя"""
         db = await self._get_db()
         return db.search(self.Anketa.peer_id == peer_id)
 
     async def has_user_anketa(self, peer_id: int, anketa_type: str) -> bool:
-        """✅ Есть ли анкета?"""
+        """Есть ли анкета?"""
         db = await self._get_db()
         return len(db.search((self.Anketa.peer_id == peer_id) & (self.Anketa.anketa_type == anketa_type))) > 0
 
     async def get_user_anketa_types(self, peer_id: int) -> List[str]:
-        """✅ Список анкет"""
+        """Список анкет"""
         db = await self._get_db()
         anketas = db.search(self.Anketa.peer_id == peer_id)
         return list(set(a["anketa_type"] for a in anketas))
 
     async def get_anketa_data(self, peer_id: int, anketa_type: str) -> Optional[Dict[str, Any]]:
-        """✅ Данные анкеты"""
+        """Данные анкеты"""
         db = await self._get_db()
         anketa = db.search((self.Anketa.peer_id == peer_id) & (self.Anketa.anketa_type == anketa_type))
         return anketa[0]["data"] if anketa else None
 
     async def delete_user_anketas(self, peer_id: int):
-        """✅ Удалить анкеты"""
+        """Удалить анкеты"""
         db = await self._get_db()
         db.remove(self.Anketa.peer_id == peer_id)
 
     async def close(self):
-        """Закрытие БД"""
         if self._db:
             self._db.close()
