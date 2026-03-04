@@ -31,6 +31,20 @@ class AsyncTinyDBManager:
         db.upsert(doc, (self.Anketa.peer_id == peer_id) & (self.Anketa.anketa_type == anketa_type))
         return True
 
+    async def save_ai_answer(self, peer_id: int, ai_answer_type: str, ai_answer: str) -> bool:
+        """сохраняет ответы от нейронки"""
+        doc = {
+            "peer_id": peer_id,
+            "anketa_type": ai_answer_type,
+            "data": ai_answer,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        db = await self._get_db()
+        db.upsert(doc, (self.Anketa.peer_id == peer_id) & (self.Anketa.ai_answer_type == ai_answer_type))
+        return True
+
+
     async def get_user_anketas(self, peer_id: int) -> List[Dict]:
         """Все анкеты пользователя"""
         db = await self._get_db()
