@@ -8,7 +8,8 @@ from bot.handlers.anketa1 import anketa1_start
 from bot.handlers.anketa2 import anketa2_start
 from bot.handlers.anketa3 import anketa3_start
 from bot.utils import get_random_text
-from bot.texts import greetings, yout_anketas_done
+from bot.texts import greetings, yout_anketas_done, reminder
+from config import Config
 
 
 
@@ -44,13 +45,12 @@ async def analyze(message: Message):
     await db_manager.save_ai_answer(peer_id=message.peer_id, ai_answer_type="first_anketas", ai_answer=result)
     await message.answer(result)
 
-@labeler.message(text="all")
-async def get_all_users(message: Message):
-    all_users = await db_manager.get_all_users()
-    await message.answer(all_users)
 
-@labeler.message(text="всем привет")
-async def send_all_hi(message: Message):
+@labeler.message(text="напомнить")
+async def send_all_message(message: Message):
+    if message.peer_id != Config.ADMIN_PEER_ID:
+        pass
+
     all_users = await db_manager.get_all_users()
     success = 0
 
@@ -58,7 +58,7 @@ async def send_all_hi(message: Message):
         try:
             await message.ctx_api.messages.send(
                 peer_id=user_id,
-                message="всем ку!",
+                message=get_random_text(reminder),
                 random_id=0
             )
             success += 1
@@ -66,4 +66,4 @@ async def send_all_hi(message: Message):
         except Exception as e:
             print(f"Ошибка для {user_id}: {e}")
 
-    await message.answer(f"Приветствия разосланы {success} пользователям!")
+    await message.answer(f"Напоминания разосланы {success} пользователям!")
