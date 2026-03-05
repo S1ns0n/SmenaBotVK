@@ -5,3 +5,4 @@ load_dotenv()
 class Config:
     BOT_TOKEN = os.getenv("BOT_TOKEN")
     OPENAI_TOKEN = os.getenv("OPENAI_TOKEN")
+    ADMIN_PEER_ID = os.getenv("ADMIN_PEER_ID")
