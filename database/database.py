@@ -82,6 +82,37 @@ class AsyncTinyDBManager:
         users = {record["peer_id"] for record in all_records if "peer_id" in record}
         return users
 
+    async def get_users_with_specific_anketas(self, required_types: Set[str]) -> Set[int]:
+        """
+        Достаёт список всех peer_id пользователей, которые заполнили указанные типы анкет.
+
+        Args:
+            required_types: множество типов анкет (например, {"anketa0", "anketa1"})
+
+        Returns:
+            множество уникальных peer_id
+        """
+        db = await self._get_db()
+        all_records = db.all()
+
+        user_anketas = {}
+
+        for record in all_records:
+            if "peer_id" in record and "anketa_type" in record:
+                peer_id = record["peer_id"]
+                anketa_type = record["anketa_type"]
+
+                if peer_id not in user_anketas:
+                    user_anketas[peer_id] = set()
+                user_anketas[peer_id].add(anketa_type)
+
+        result = {
+            peer_id for peer_id, types in user_anketas.items()
+            if required_types.issubset(types)
+        }
+
+        return result
+
     async def close(self):
         if self._db:
             self._db.close()
