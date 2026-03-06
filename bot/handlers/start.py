@@ -10,6 +10,7 @@ from bot.handlers.anketa3 import anketa3_start
 from bot.utils import get_random_text
 from bot.texts import greetings, yout_anketas_done, reminder
 from config import Config
+from bot.uploaders import photo_uploader
 
 
 
@@ -27,7 +28,11 @@ async def start_anketas(message: Message):
 
     for anketa_name, handler in anketa_handlers.items():
         if anketa_name not in all_user_anketas:
-            await message.answer(get_random_text(greetings))
+            photo = await photo_uploader.upload(
+                file_source=str(Config.START_IMAGE),
+                peer_id=message.peer_id,
+            )
+            await message.answer(get_random_text(greetings), attachment=photo)
             await handler(message)
             return
 
@@ -76,7 +81,7 @@ async def get_all_users_with_all_anketas(message: Message):
     if message.peer_id != Config.ADMIN_PEER_ID:
         pass
 
-    users = await db_manager.get_users_with_all_anketas()
+    users = await db_manager.get_users_with_specific_anketas({"anketa0", "anketa1", "anketa2", "anketa3"})
     await message.answer(users)
     await message.answer(len(users))
 
@@ -107,7 +112,7 @@ async def send_all_message(message: Message):
     if message.peer_id != Config.ADMIN_PEER_ID:
         pass
 
-    all_users = await db_manager.get_all_users()
+    all_users = await db_manager.get_users_without_all_anketas({"anketa0", "anketa1", "anketa2", "anketa3"})
     success = 0
 
     for user_id in all_users:
