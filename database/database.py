@@ -113,6 +113,36 @@ class AsyncTinyDBManager:
 
         return result
 
+    async def get_users_without_all_anketas(self, required_types: Set[str]) -> Set[int]:
+        """
+        Достаёт список всех peer_id пользователей, которые НЕ заполнили все указанные типы анкет.
+        """
+        db = await self._get_db()
+        all_records = db.all()
+
+
+        all_users_with_any_anketa = set()
+        user_anketas = {}
+
+        for record in all_records:
+            if "peer_id" in record and "anketa_type" in record:
+                peer_id = record["peer_id"]
+                anketa_type = record["anketa_type"]
+
+                all_users_with_any_anketa.add(peer_id)
+
+                if peer_id not in user_anketas:
+                    user_anketas[peer_id] = set()
+                user_anketas[peer_id].add(anketa_type)
+
+        # Оставляем только тех, у кого НЕТ всех требуемых типов
+        result = {
+            peer_id for peer_id in all_users_with_any_anketa
+            if not required_types.issubset(user_anketas.get(peer_id, set()))
+        }
+
+        return result
+
     async def close(self):
         if self._db:
             self._db.close()
