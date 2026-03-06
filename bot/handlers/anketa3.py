@@ -144,8 +144,4 @@ async def q11_process(message: Message):
 
     await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa3", data=anketa_data)
     await state_dispanser.delete(message.peer_id)
-
-    await message.answer("Анализирую ваши анкеты...", keyboard=empty_kb)
-    result = await analyzer.analyze_peer_anketas(message.peer_id)
-    await db_manager.save_ai_answer(peer_id=message.peer_id, ai_answer_type="first_anketas", ai_answer=result)
-    await message.answer(get_random_text(thx_for_close_anketas))
+    await message.answer(get_random_text(thx_for_close_anketas), keyboard=empty_kb)
