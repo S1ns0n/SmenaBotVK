@@ -45,6 +45,7 @@ async def clear_all_anktets(message: Message):
         pass
     await db_manager.delete_user_anketas(peer_id=message.peer_id)
     await message.answer("Очищено!")
+
 @labeler.message(text="анализ")
 async def analyze(message: Message):
     if message.peer_id != Config.ADMIN_PEER_ID:
@@ -54,26 +55,94 @@ async def analyze(message: Message):
     await db_manager.save_ai_answer(peer_id=message.peer_id, ai_answer_type="first_anketas", ai_answer=result)
     await message.answer(result)
 
+@labeler.message(text="тест")
+async def test(message: Message):
+    if message.peer_id != Config.ADMIN_PEER_ID:
+        pass
+    result = await db_manager.get_users_ready_for_first_anketa()
+
+    await message.answer(result)
+
+
 @labeler.message(text="анализ прошедших")
 async def analyze_all(message: Message):
     if message.peer_id != Config.ADMIN_PEER_ID:
-        pass
-    checked = 0
+        return
 
-    users = await db_manager.get_users_with_specific_anketas({"anketa0", "anketa1", "anketa2", "anketa3"})
-    mes = await message.answer(f"Начал анализ прошедних...\nУже проверил: {checked} из {len(users)}")
-    for user in users:
+    try:
+        # Получаем пользователей и проверяем, есть ли работа
+        users = await db_manager.get_users_ready_for_first_anketa()
+        if not users:
+            await message.answer("👤 Нет пользователей, готовых к first_anketa!")
+            return
 
-        result = await analyzer.analyze_peer_anketas(user)
-        await db_manager.save_ai_answer(peer_id=user, ai_answer_type="first_anketas", ai_answer=result)
-        checked = checked+1
+        checked_users = await db_manager.get_users_with_specific_anketas({"first_anketas"})
+        already_checked = len(checked_users & users)  # Только те, кто в текущем списке
+        remaining_users = users - checked_users
+
+        if not remaining_users:
+            await message.answer(f"✅ Все {len(users)} пользователей уже проанализированы!")
+            return
+
+        await message.answer(
+            f"🔄 Начинаю анализ {len(remaining_users)} пользователей...\n"
+            f"📊 Уже проверено: {already_checked}/{len(users)}"
+        )
+
+        mes = await message.answer("⏳ Подготовка...")
+        processed = 0
+        errors = 0
+
+        for user in remaining_users:
+            try:
+                # Проверяем еще раз перед анализом (на случай параллельных запусков)
+                if await db_manager.has_user_anketa(user, "first_anketas"):
+                    processed += 1
+                    continue
+
+                result = await analyzer.analyze_peer_anketas(user)
+                await db_manager.save_ai_answer(
+                    peer_id=user,
+                    ai_answer_type="first_anketas",
+                    ai_answer=result
+                )
+                processed += 1
+
+            except Exception as e:
+                errors += 1
+                print(f"❌ Ошибка анализа user {user}: {e}")
+                continue
+
+            # Обновляем прогресс каждые 5 пользователей или при ошибке
+            if processed % 5 == 0 or errors > 0:
+                progress_text = (
+                    f"🔄 Анализ в процессе...\n"
+                    f"✅ Обработано: {processed}/{len(remaining_users)}\n"
+                    f"❌ Ошибок: {errors}\n"
+                    f"📊 Осталось: {len(remaining_users) - processed}"
+                )
+                await message.ctx_api.messages.edit(
+                    peer_id=message.peer_id,
+                    message_id=mes.message_id,
+                    message=progress_text
+                )
+
+        # Финальное сообщение
+        final_status = (
+            f"✅ Анализ завершен!\n"
+            f"📊 Обработано: {processed}\n"
+            f"❌ Ошибок: {errors}\n"
+            f"🎯 Готово к first_anketa: {len(remaining_users) - errors}"
+        )
         await message.ctx_api.messages.edit(
             peer_id=message.peer_id,
             message_id=mes.message_id,
-            message=f"Начал анализ прошедних...\n уже проверил: {checked} из {len(users)}"
+            message=final_status
         )
 
-    await message.answer("Проверка окончена!")
+    except Exception as e:
+        await message.answer(f"💥 Критическая ошибка: {str(e)}")
+        print(f"Критическая ошибка в analyze_all: {e}")
 
 
 @labeler.message(text="прошедшие")

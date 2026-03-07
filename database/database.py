@@ -143,6 +143,60 @@ class AsyncTinyDBManager:
 
         return result
 
+    async def set_user_status(self, peer_id: int, status: str) -> bool:
+        """
+        Добавляет/обновляет статус пользователю.
+
+        Args:
+            peer_id: ID пользователя
+            status: статус (например, "answered", "pending", "completed")
+
+        Returns:
+            True при успешном сохранении
+        """
+        doc = {
+            "peer_id": peer_id,
+            "anketa_type": "user_status",
+            "data": status,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        db = await self._get_db()
+        db.upsert(doc, self.Anketa.peer_id == peer_id & self.Anketa.anketa_type == "user_status")
+        return True
+
+    async def get_users_ready_for_first_anketa(self) -> Set[int]:
+        """
+        Возвращает список пользователей, у которых заполнены анкеты
+        "anketa0", "anketa1", "anketa2", "anketa3", но нет "first_anketas".
+
+        Returns:
+            множество уникальных peer_id подходящих пользователей
+        """
+        db = await self._get_db()
+        all_records = db.all()
+
+        user_anketas = {}
+
+        # Собираем анкеты по пользователям
+        for record in all_records:
+            if "peer_id" in record and "anketa_type" in record:
+                peer_id = record["peer_id"]
+                anketa_type = record["anketa_type"]
+
+                if peer_id not in user_anketas:
+                    user_anketas[peer_id] = set()
+                user_anketas[peer_id].add(anketa_type)
+
+        # Ищем пользователей с требуемыми анкетами и без first_anketas
+        required_types = {"anketa0", "anketa1", "anketa2", "anketa3"}
+        result = {
+            peer_id for peer_id, types in user_anketas.items()
+            if required_types.issubset(types) and "first_anketas" not in types
+        }
+
+        return result
+
     async def close(self):
         if self._db:
             self._db.close()
