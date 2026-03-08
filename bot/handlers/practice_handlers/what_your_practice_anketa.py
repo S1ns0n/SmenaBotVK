@@ -20,6 +20,25 @@ async def practice_anketa_start(message: Message):
     await message.answer("Привет, друг!\nКак прошли твои дни? Надеюсь, ты все еще полон сил, а теперь еще и насытился полезными ответами, мудрыми вопросами и значимыми открытиями. Давай исследуем твой рост в процессе тренинга.\nВыбери тренинг, который ты прошел:\n\n1) Путь к самореализации\n\n2) Формула мечты\n\n3) Тренинг по модели героя-созидателя", keyboard=practice_kb)
     await state_dispanser.set(message.peer_id, PracticeAnketaState.PRACTICE)
 
+async def send_practice_anketa(api, peer_id: int):
+    """Отправляет анкету и устанавливает состояние для конкретного пользователя"""
+    await api.messages.send(
+        peer_id=peer_id,
+        message=(
+            "Привет, друг!\n"
+            "Как прошли твои дни? Надеюсь, ты все еще полон сил, "
+            "а теперь еще и насытился полезными ответами, мудрыми вопросами "
+            "и значимыми открытиями. Давай исследуем твой рост в процессе тренинга.\n"
+            "Выбери тренинг, который ты прошел:\n\n"
+            "1) Путь к самореализации\n\n"
+            "2) Формула мечты\n\n"
+            "3) Тренинг по модели героя-созидателя"
+        ),
+        keyboard=practice_kb.get_json(),  # важно: .get_json() при отправке через API
+        random_id=0
+    )
+    await state_dispanser.set(peer_id, PracticeAnketaState.PRACTICE)
+
 @what_your_practice_anketa_labeler.message(state=PracticeAnketaState.PRACTICE)
 async def what_practice_process(message: Message):
     answer = message.text
