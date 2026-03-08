@@ -2,15 +2,14 @@ import asyncio
 from bot.labeler_config import labeler
 from vkbottle.bot import Message
 from database import db_manager
-from ai import analyzer
 from bot.handlers.anketa0 import anketa0_start
 from bot.handlers.anketa1 import anketa1_start
 from bot.handlers.anketa2 import anketa2_start
 from bot.handlers.anketa3 import anketa3_start
 from bot.utils import get_random_text
-from bot.texts import greetings, yout_anketas_done, reminder
+from bot.texts import reminder
 from config import Config
-from bot.uploaders import photo_uploader
+from bot.handlers.practice_handlers.what_your_practice_anketa import practice_anketa_start
 
 
 
@@ -23,158 +22,8 @@ anketa_handlers = {
 
 @labeler.message(text=["/start", "Начать"])
 async def start_anketas(message: Message):
-    all_user_anketas = await db_manager.get_user_anketa_types(message.peer_id)
-    print(all_user_anketas)
+    await practice_anketa_start(message)
 
-    for anketa_name, handler in anketa_handlers.items():
-        if anketa_name not in all_user_anketas:
-            photo = await photo_uploader.upload(
-                file_source=str(Config.START_IMAGE),
-                peer_id=message.peer_id,
-            )
-            await message.answer(get_random_text(greetings), attachment=photo)
-            await handler(message)
-            return
-
-    await message.answer(get_random_text(yout_anketas_done))
-
-
-@labeler.message(text="очистка")
-async def clear_all_anktets(message: Message):
-    if message.peer_id != Config.ADMIN_PEER_ID:
-        pass
-    await db_manager.delete_user_anketas(peer_id=message.peer_id)
-    await message.answer("Очищено!")
-
-@labeler.message(text="анализ")
-async def analyze(message: Message):
-    if message.peer_id != Config.ADMIN_PEER_ID:
-        pass
-    await message.answer("Анализирую ваши анкеты...")
-    result = await analyzer.analyze_peer_anketas(message.peer_id)
-    await db_manager.save_ai_answer(peer_id=message.peer_id, ai_answer_type="first_anketas", ai_answer=result)
-    await message.answer(result)
-
-@labeler.message(text="тест")
-async def test(message: Message):
-    if message.peer_id != Config.ADMIN_PEER_ID:
-        pass
-    result = await db_manager.get_users_ready_for_first_anketa()
-
-    await message.answer(result)
-
-
-@labeler.message(text="анализ прошедших")
-async def analyze_all(message: Message):
-    if message.peer_id != Config.ADMIN_PEER_ID:
-        return
-
-    try:
-        # Получаем пользователей и проверяем, есть ли работа
-        users = await db_manager.get_users_ready_for_first_anketa()
-        if not users:
-            await message.answer("👤 Нет пользователей, готовых к first_anketa!")
-            return
-
-        checked_users = await db_manager.get_users_with_specific_anketas({"first_anketas"})
-        already_checked = len(checked_users & users)  # Только те, кто в текущем списке
-        remaining_users = users - checked_users
-
-        if not remaining_users:
-            await message.answer(f"✅ Все {len(users)} пользователей уже проанализированы!")
-            return
-
-        await message.answer(
-            f"🔄 Начинаю анализ {len(remaining_users)} пользователей...\n"
-            f"📊 Уже проверено: {already_checked}/{len(users)}"
-        )
-
-        mes = await message.answer("⏳ Подготовка...")
-        processed = 0
-        errors = 0
-
-        for user in remaining_users:
-            try:
-                # Проверяем еще раз перед анализом (на случай параллельных запусков)
-                if await db_manager.has_user_anketa(user, "first_anketas"):
-                    processed += 1
-                    continue
-
-                result = await analyzer.analyze_peer_anketas(user)
-                await db_manager.save_ai_answer(
-                    peer_id=user,
-                    ai_answer_type="first_anketas",
-                    ai_answer=result
-                )
-                processed += 1
-
-            except Exception as e:
-                errors += 1
-                print(f"❌ Ошибка анализа user {user}: {e}")
-                continue
-
-            # Обновляем прогресс каждые 5 пользователей или при ошибке
-            if processed % 5 == 0 or errors > 0:
-                progress_text = (
-                    f"🔄 Анализ в процессе...\n"
-                    f"✅ Обработано: {processed}/{len(remaining_users)}\n"
-                    f"❌ Ошибок: {errors}\n"
-                    f"📊 Осталось: {len(remaining_users) - processed}"
-                )
-                await message.ctx_api.messages.edit(
-                    peer_id=message.peer_id,
-                    message_id=mes.message_id,
-                    message=progress_text
-                )
-
-        # Финальное сообщение
-        final_status = (
-            f"✅ Анализ завершен!\n"
-            f"📊 Обработано: {processed}\n"
-            f"❌ Ошибок: {errors}\n"
-            f"🎯 Готово к first_anketa: {len(remaining_users) - errors}"
-        )
-        await message.ctx_api.messages.edit(
-            peer_id=message.peer_id,
-            message_id=mes.message_id,
-            message=final_status
-        )
-
-    except Exception as e:
-        await message.answer(f"💥 Критическая ошибка: {str(e)}")
-        print(f"Критическая ошибка в analyze_all: {e}")
-
-
-@labeler.message(text="прошедшие")
-async def get_all_users_with_all_anketas(message: Message):
-    if message.peer_id != Config.ADMIN_PEER_ID:
-        pass
-
-    users = await db_manager.get_users_with_specific_anketas({"anketa0", "anketa1", "anketa2", "anketa3"})
-    await message.answer(users)
-    await message.answer(len(users))
-
-@labeler.message(text="рассылка прошедшим")
-async def send_ai_answers_all_users(message: Message):
-    if message.peer_id != Config.ADMIN_PEER_ID:
-        pass
-
-    users = await db_manager.get_users_with_specific_anketas({"first_anketas"})
-    success = 0
-
-    for user_id in users:
-        try:
-            await message.ctx_api.messages.send(
-                peer_id=user_id,
-                message=await db_manager.get_anketa_data(peer_id=user_id, anketa_type="first_anketas"),
-                random_id=0
-            )
-            success += 1
-            await asyncio.sleep(0.3)
-        except Exception as e:
-            print(f"Ошибка для {user_id}: {e}")
-
-    await message.answer(f"Ответы разосланы {success} пользователям!")
 
 @labeler.message(text="напомнить")
 async def send_all_message(message: Message):
