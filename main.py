@@ -15,7 +15,7 @@ from bot.handlers import (
     what_your_practice_anketa_labeler,
     practice1_labeler,
     practice2_labeler,
-    practice3_labeler
+    practice3_labeler,
 )
 
 labeler.load(anketa0_labeler)

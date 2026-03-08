@@ -22,6 +22,7 @@ anketa_handlers = {
 
 @labeler.message(text=["/start", "Начать"])
 async def start_anketas(message: Message):
+    await message.answer("убрать повторное прохождение")
     await practice_anketa_start(message)
 
 

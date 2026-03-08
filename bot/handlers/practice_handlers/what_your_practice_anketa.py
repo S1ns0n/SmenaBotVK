@@ -1,9 +1,14 @@
+from unittest import case
+
 from bot.labeler_config import state_dispanser, ctx_storage
 from vkbottle.bot import Message, BotLabeler
 from vkbottle import BaseStateGroup
 from bot.keyboards.what_your_practice_anketa_kb import practice_kb
 from bot.keyboards import empty_kb
 from database import db_manager
+from bot.handlers.practice_handlers.practice1 import practice1_start
+from bot.handlers.practice_handlers.practice2 import practice2_start
+from bot.handlers.practice_handlers.practice3 import practice3_start
 
 
 what_your_practice_anketa_labeler = BotLabeler()
@@ -18,7 +23,16 @@ async def practice_anketa_start(message: Message):
 @what_your_practice_anketa_labeler.message(state=PracticeAnketaState.PRACTICE)
 async def what_practice_process(message: Message):
     answer = message.text
-    if answer == "1":
-        pass
+    match answer:
+        case "1":
+            await practice1_start(message)
+        case "2":
+            await practice2_start(message)
+        case "3":
+            await practice3_start(message)
+        case _:
+            await message.answer("Выбери цифру)")
+
+
 
 
