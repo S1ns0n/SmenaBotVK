@@ -47,9 +47,9 @@ class Practice3State(BaseStateGroup):
 QUESTIONS_PRACTICE3_1 = {
     Practice3State.DREAM_DEFINED: "3.1. «На волнах мечты»\n\nОпределил ли ты в процессе тренинга свою мечту?\n1) да\n2) у меня была мечта, но я ее детальнее проработал\n3) нет\n4) затрудняюсь ответить",
     Practice3State.FUTURE_VISION: "Обрел ли ты четкий образ желаемого будущего состояния счастья или сильное чувство направления, куда хочешь двигаться?\n1) да\n2) нет\n3) затрудняюсь ответить",
-    Practice3State.WAVES_LISTENING: "Научился ли ты слушать «волны»?\n1) да\n2) нет\n3) затрудняюсь ответить",
-    Practice3State.WORLDVIEW_CHANGED: "Изменились ли некоторые твои взгляды на мир и на себя самого?\n1) да\n2) нет\n3) затрудняюсь ответить",
-    Practice3State.KNOWLEDGE_SHARE: "Обрел ли ты важное знание, которым хочешь поделиться с друзьями и близкими?\n1) да\n2) нет\n3) затрудняюсь ответить",
+    Practice3State.WAVES_LISTENING: "Научился ли ты слушать «волны»?",
+    Practice3State.WORLDVIEW_CHANGED: "Изменились ли некоторые твои взгляды на мир и на себя самого?",
+    Practice3State.KNOWLEDGE_SHARE: "Обрел ли ты важное знание, которым хочешь поделиться с друзьями и близкими?",
     Practice3State.CLARITY_DREAM: "Оцени понятность тренинга для тебя по 10-балльной шкале, где 10 – самый высокий балл",
     Practice3State.USEFULNESS_DREAM: "Оцени полезность тренинга по 10-балльной шкале, где 10 – самый высокий балл",
     Practice3State.INTEREST_DREAM: "Оцени интересность тренинга для тебя по 10-балльной шкале, где 10 – самый высокий балл",
@@ -63,9 +63,9 @@ QUESTIONS_PRACTICE3_2 = {
     Practice3State.VALUES_UNDERSTANDING: "3.2. «Качества и ценности»\n\nИзменилось ли твое понимание своих ценностей и их значимости?\n1) да\n2) нет\n3) затрудняюсь ответить",
     Practice3State.NEW_QUALITIES: "Открыл ли ты для себя новые личные качества, которых раньше в себе не замечал?\n1) да\n2) нет\n3) затрудняюсь ответить",
     Practice3State.PEERS_EXPANDED: "Расширился ли твой круг единомышленников?\n1) да\n2) нет\n3) затрудняюсь ответить",
-    Practice3State.IMPLEMENTATION_PLAN: "Получил ли ты четкий понятный план и навыки для реализации своих желаний?\n1) да\n2) нет\n3) затрудняюсь ответить",
-    Practice3State.WORLDVIEW_CHANGED_VALUES: "Изменились ли некоторые твои взгляды на мир и на себя самого?\n1) да\n2) нет\n3) затрудняюсь ответить",
-    Practice3State.KNOWLEDGE_SHARE_VALUES: "Обрел ли ты важное знание, которым хочешь поделиться с друзьями и близкими?\n1) да\n2) нет\n3) затрудняюсь ответить",
+    Practice3State.IMPLEMENTATION_PLAN: "Получил ли ты четкий понятный план и навыки для реализации своих желаний?",
+    Practice3State.WORLDVIEW_CHANGED_VALUES: "Изменились ли некоторые твои взгляды на мир и на себя самого?",
+    Practice3State.KNOWLEDGE_SHARE_VALUES: "Обрел ли ты важное знание, которым хочешь поделиться с друзьями и близкими?",
     Practice3State.CLARITY_VALUES: "Оцени понятность тренинга для тебя по 10-балльной шкале, где 10 – самый высокий балл",
     Practice3State.USEFULNESS_VALUES: "Оцени полезность тренинга по 10-балльной шкале, где 10 – самый высокий балл",
     Practice3State.INTEREST_VALUES: "Оцени интересность тренинга для тебя по 10-балльной шкале, где 10 – самый высокий балл",
@@ -121,43 +121,31 @@ async def q2_dream_process(message: Message):
         return
     ctx_storage.set(Practice3State.FUTURE_VISION, text)
     await message.answer(QUESTIONS_PRACTICE3_1[Practice3State.WAVES_LISTENING],
-                         keyboard=await create_numbered_keyboard(3))
+                         keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice3State.WAVES_LISTENING)
 
 
 @practice3_labeler.message(state=Practice3State.WAVES_LISTENING)
 async def q3_dream_process(message: Message):
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 3):
-        await message.answer("Пожалуйста, выбери номер от 1 до 3",
-                             keyboard=await create_numbered_keyboard(3))
-        return
     ctx_storage.set(Practice3State.WAVES_LISTENING, text)
     await message.answer(QUESTIONS_PRACTICE3_1[Practice3State.WORLDVIEW_CHANGED],
-                         keyboard=await create_numbered_keyboard(3))
+                         keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice3State.WORLDVIEW_CHANGED)
 
 
 @practice3_labeler.message(state=Practice3State.WORLDVIEW_CHANGED)
 async def q4_dream_process(message: Message):
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 3):
-        await message.answer("Пожалуйста, выбери номер от 1 до 3",
-                             keyboard=await create_numbered_keyboard(3))
-        return
     ctx_storage.set(Practice3State.WORLDVIEW_CHANGED, text)
     await message.answer(QUESTIONS_PRACTICE3_1[Practice3State.KNOWLEDGE_SHARE],
-                         keyboard=await create_numbered_keyboard(3))
+                         keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice3State.KNOWLEDGE_SHARE)
 
 
 @practice3_labeler.message(state=Practice3State.KNOWLEDGE_SHARE)
 async def q5_dream_process(message: Message):
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 3):
-        await message.answer("Пожалуйста, выбери номер от 1 до 3",
-                             keyboard=await create_numbered_keyboard(3))
-        return
     ctx_storage.set(Practice3State.KNOWLEDGE_SHARE, text)
     await message.answer(QUESTIONS_PRACTICE3_1[Practice3State.CLARITY_DREAM],
                          keyboard=await create_scale_keyboard())
@@ -295,43 +283,31 @@ async def q3_values_process(message: Message):
         return
     ctx_storage.set(Practice3State.PEERS_EXPANDED, text)
     await message.answer(QUESTIONS_PRACTICE3_2[Practice3State.IMPLEMENTATION_PLAN],
-                        keyboard=await create_numbered_keyboard(3))
+                        keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice3State.IMPLEMENTATION_PLAN)
 
 
 @practice3_labeler.message(state=Practice3State.IMPLEMENTATION_PLAN)
 async def q4_values_process(message: Message):
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 3):
-        await message.answer("Пожалуйста, выбери номер от 1 до 3",
-                           keyboard=await create_numbered_keyboard(3))
-        return
     ctx_storage.set(Practice3State.IMPLEMENTATION_PLAN, text)
     await message.answer(QUESTIONS_PRACTICE3_2[Practice3State.WORLDVIEW_CHANGED_VALUES],
-                        keyboard=await create_numbered_keyboard(3))
+                        keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice3State.WORLDVIEW_CHANGED_VALUES)
 
 
 @practice3_labeler.message(state=Practice3State.WORLDVIEW_CHANGED_VALUES)
 async def q5_values_process(message: Message):
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 3):
-        await message.answer("Пожалуйста, выбери номер от 1 до 3",
-                           keyboard=await create_numbered_keyboard(3))
-        return
     ctx_storage.set(Practice3State.WORLDVIEW_CHANGED_VALUES, text)
     await message.answer(QUESTIONS_PRACTICE3_2[Practice3State.KNOWLEDGE_SHARE_VALUES],
-                        keyboard=await create_numbered_keyboard(3))
+                        keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice3State.KNOWLEDGE_SHARE_VALUES)
 
 
 @practice3_labeler.message(state=Practice3State.KNOWLEDGE_SHARE_VALUES)
 async def q6_values_process(message: Message):
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 3):
-        await message.answer("Пожалуйста, выбери номер от 1 до 3",
-                           keyboard=await create_numbered_keyboard(3))
-        return
     ctx_storage.set(Practice3State.KNOWLEDGE_SHARE_VALUES, text)
     await message.answer(QUESTIONS_PRACTICE3_2[Practice3State.CLARITY_VALUES],
                         keyboard=await create_scale_keyboard())

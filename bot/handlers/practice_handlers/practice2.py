@@ -28,9 +28,9 @@ class Practice2State(BaseStateGroup):
 QUESTIONS_PRACTICE2 = {
     Practice2State.DREAM_DEFINED: "Определил ли ты в процессе тренинга свою мечту?\n1) да\n2) у меня была мечта, но я ее детальнее проработал\n3) нет\n4) затрудняюсь ответить",
     Practice2State.FUTURE_VISION: "Обрел ли ты четкий образ желаемого будущего состояния счастья или сильное чувство направления, куда хочешь двигаться?\n1) да\n2) нет\n3) затрудняюсь ответить",
-    Practice2State.FORMULA_IMPL: "Запомнил и внедрил ли ты в свою жизнь все 4 основы и 7 ключей Формулы?\n1) да\n2) заполнил, но не внедрил\n3) нет\n4) затрудняюсь ответить",
-    Practice2State.WORLDVIEW_CHANGED: "Изменились ли некоторые твои взгляды на мир и на себя самого?\n1) да\n2) нет\n3) затрудняюсь ответить",
-    Practice2State.KNOWLEDGE_SHARE: "Обрел ли ты важное знание, которым хочешь поделиться с друзьями и близкими?\n1) да\n2) нет\n3) затрудняюсь ответить",
+    Practice2State.FORMULA_IMPL: "Запомнил и внедрил ли ты в свою жизнь все 4 основы и 7 ключей Формулы?",
+    Practice2State.WORLDVIEW_CHANGED: "Изменились ли некоторые твои взгляды на мир и на себя самого?",
+    Practice2State.KNOWLEDGE_SHARE: "Обрел ли ты важное знание, которым хочешь поделиться с друзьями и близкими?",
     Practice2State.CLARITY: "Оцени понятность тренинга для тебя по 10-балльной шкале, где 10 – самый высокий балл",
     Practice2State.USEFULNESS: "Оцени полезность тренинга по 10-балльной шкале, где 10 – самый высокий балл",
     Practice2State.INTEREST: "Оцени интересность тренинга для тебя по 10-балльной шкале, где 10 – самый высокий балл",
@@ -70,41 +70,29 @@ async def q2_process(message: Message):
         await message.answer("Пожалуйста, выбери номер от 1 до 3", keyboard=await create_numbered_keyboard(3))
         return
     ctx_storage.set(Practice2State.FUTURE_VISION, text)
-    await message.answer(QUESTIONS_PRACTICE2[Practice2State.FORMULA_IMPL], keyboard=await create_numbered_keyboard(4))
+    await message.answer(QUESTIONS_PRACTICE2[Practice2State.FORMULA_IMPL], keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice2State.FORMULA_IMPL)
 
 
 @practice2_labeler.message(state=Practice2State.FORMULA_IMPL)
 async def q3_process(message: Message):
-    # Валидация выбора 1-4
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 4):
-        await message.answer("Пожалуйста, выбери номер от 1 до 4", keyboard=await create_numbered_keyboard(4))
-        return
     ctx_storage.set(Practice2State.FORMULA_IMPL, text)
-    await message.answer(QUESTIONS_PRACTICE2[Practice2State.WORLDVIEW_CHANGED], keyboard=await create_numbered_keyboard(3))
+    await message.answer(QUESTIONS_PRACTICE2[Practice2State.WORLDVIEW_CHANGED], keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice2State.WORLDVIEW_CHANGED)
 
 
 @practice2_labeler.message(state=Practice2State.WORLDVIEW_CHANGED)
 async def q4_process(message: Message):
-    # Валидация выбора 1-3
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 3):
-        await message.answer("Пожалуйста, выбери номер от 1 до 3", keyboard=await create_numbered_keyboard(3))
-        return
     ctx_storage.set(Practice2State.WORLDVIEW_CHANGED, text)
-    await message.answer(QUESTIONS_PRACTICE2[Practice2State.KNOWLEDGE_SHARE], keyboard=await create_numbered_keyboard(3))
+    await message.answer(QUESTIONS_PRACTICE2[Practice2State.KNOWLEDGE_SHARE], keyboard=empty_kb)
     await state_dispanser.set(message.peer_id, Practice2State.KNOWLEDGE_SHARE)
 
 
 @practice2_labeler.message(state=Practice2State.KNOWLEDGE_SHARE)
 async def q5_process(message: Message):
-    # Валидация выбора 1-3
     text = message.text.strip()
-    if not text.isdigit() or not (1 <= int(text) <= 3):
-        await message.answer("Пожалуйста, выбери номер от 1 до 3", keyboard=await create_numbered_keyboard(3))
-        return
     ctx_storage.set(Practice2State.KNOWLEDGE_SHARE, text)
     await message.answer(QUESTIONS_PRACTICE2[Practice2State.CLARITY], keyboard=await create_scale_keyboard())
     await state_dispanser.set(message.peer_id, Practice2State.CLARITY)
