@@ -37,19 +37,31 @@ async def check(message: Message):
 
     await message.answer(all_users)
 
+@labeler.message(text="команды")
+async def commands(message: Message):
+    if message.peer_id != int(Config.ADMIN_PEER_ID):
+        return
+
+    mes = ("Начать - начать сценарий треннинга (команда для всех)\n"
+           "проверка - получить список всех пользователей\n"
+           "напомнить - начать рассылку тренингов\n")
+
+    await message.answer(mes)
+
 @labeler.message(text="напомнить")
 async def send_all_message(message: Message):
     if message.peer_id != int(Config.ADMIN_PEER_ID):
         return
 
-    all_users = await db_manager.get_all_users()
+    all_users_without_status = await db_manager.get_users_without_status("sended_practice")
     success = 0
     errors = 0
 
-    for user_id in all_users:
+    for user_id in all_users_without_status:
         try:
             await send_practice_anketa(message.ctx_api, user_id)
             success += 1
+            await db_manager.select_status_for_user(user_id, "sended_practice")
             await asyncio.sleep(0.3)
         except Exception as e:
             errors += 1

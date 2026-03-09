@@ -126,6 +126,49 @@ class AsyncTinyDBManager:
 
         return True
 
+    async def select_status_for_user(self, peer_id: int, status: str) -> bool:
+        """
+        Устанавливает статус для пользователя.
+        """
+        doc = {
+            "peer_id": peer_id,
+            "status_type": "user_status",  # чтобы отличать от других записей
+            "status": status,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
+        db = await self._get_db()
+        StatusQuery = Query()
+
+        existing = db.search((StatusQuery.peer_id == peer_id) &
+                             (StatusQuery.status_type == "user_status"))
+
+        if existing:
+            db.update(doc, (StatusQuery.peer_id == peer_id) &
+                      (StatusQuery.status_type == "user_status"))
+        else:
+            db.insert(doc)
+
+        return True
+
+    async def get_users_without_status(self, status: str) -> Set[int]:
+        """
+        Возвращает множество peer_id пользователей, у которых текущий статус
+        не равен указанному или статус вообще не установлен.
+        """
+        all_users = await self.get_all_users()
+
+        db = await self._get_db()
+        StatusQuery = Query()
+
+        status_records = db.search(
+            (StatusQuery.status_type == "user_status") &
+            (StatusQuery.status == status)
+        )
+
+        users_with_given_status = {record["peer_id"] for record in status_records}
+
+        return all_users - users_with_given_status
 
     async def close(self):
         if self._db:
