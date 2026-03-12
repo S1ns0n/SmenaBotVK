@@ -1,7 +1,7 @@
 import asyncio
 from bot.labeler_config import labeler
 from vkbottle.bot import Message
-from database import db_manager
+from database import db_manager, exporter
 from bot.handlers.anketa0 import anketa0_start
 from bot.handlers.anketa1 import anketa1_start
 from bot.handlers.anketa2 import anketa2_start
@@ -34,7 +34,11 @@ async def check(message: Message):
         return
 
     all_users = await db_manager.get_all_users()
-
+    users_with_practice1 = await db_manager.get_users_with_specific_anketas({"practice1"})
+    users_with_practice2 = await db_manager.get_users_with_specific_anketas({"practice2"})
+    users_with_practice3_1 = await db_manager.get_users_with_specific_anketas({"practice3_1"})
+    users_with_practice3_2 = await db_manager.get_users_with_specific_anketas({"practice3_2"})
+    await message.answer(f"Всего прошло анкету по тренингам: {len(users_with_practice1) + len(users_with_practice2) + len(users_with_practice3_1) + len(users_with_practice3_2)}")
     await message.answer(all_users)
 
 @labeler.message(text="команды")
@@ -44,9 +48,21 @@ async def commands(message: Message):
 
     mes = ("Начать - начать сценарий треннинга (команда для всех)\n"
            "проверка - получить список всех пользователей\n"
-           "напомнить - начать рассылку тренингов\n")
+           "напомнить - начать рассылку тренингов\n"
+           "экспорт - начать выгрузку в гугл таблицы")
 
     await message.answer(mes)
+
+@labeler.message(text="экспорт")
+async def export_users_data(message: Message):
+    if message.peer_id != int(Config.ADMIN_PEER_ID):
+        return
+
+    detailed_url = await exporter.export_to_google_sheets(detailed=False)
+
+
+
+    await message.answer(detailed_url)
 
 @labeler.message(text="напомнить")
 async def send_all_message(message: Message):
