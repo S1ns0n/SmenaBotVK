@@ -11,6 +11,7 @@ class Config:
     BASE_DIR = Path(__file__).parent
     IMAGES_DIR = BASE_DIR / "bot" / "images"
     START_IMAGE = IMAGES_DIR / "1.png"
+    AI_IMAGE = IMAGES_DIR / "2.png"
 
     GOOGLE_CRED_PATH = BASE_DIR / "creds.json"
     GOOGLE_TABLE_NAME = "Выгрузка данных"
