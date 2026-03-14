@@ -93,7 +93,12 @@ async def projects_process(message: Message):
         file_source=str(Config.AI_IMAGE),
         peer_id=message.peer_id,
     )
+
     await message.answer(answer, attachment=photo)
+
+    await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="anketa1", data=anketa_data)
+    await db_manager.save_anketa(peer_id=message.peer_id, anketa_type="ai_answer", data={"answer": answer})
+
 
 
 
