@@ -69,13 +69,27 @@ async def send_all_message(message: Message):
     if message.peer_id != int(Config.ADMIN_PEER_ID):
         return
 
-    all_users_without_status = await db_manager.get_users_without_status("sended_practice")
+    all_users = await db_manager.get_all_users()
+    print(all_users)
     success = 0
     errors = 0
 
-    for user_id in all_users_without_status:
+    for user_id in all_users:
         try:
-            await send_practice_anketa(message.ctx_api, user_id)
+            await message.ctx_api.messages.send(
+                peer_id=user_id,
+                message="""Друзья!
+
+Мы знаем, что именно из ваших идей и смелых фантазий рождаются самые крутые проекты. Но чтобы наши общие мечты превращались в реальность, нам нужна ваша обратная связь!
+
+Если вы еще не успели поделиться своими мыслями, сейчас самое время. Нам важно услышать голос каждого Мечтателя. Ваши ответы помогут нам понять, куда двигаться дальше и как сделать наше пространство еще лучше.
+
+ссылка на выходную анкету:
+https://forms.yandex.ru/cloud/69b8016695add5bd9218dcf5
+
+Пройдите анкету, это займет всего 5-7 минут, но подарит нам бесценный материал для размышлений.""",
+                random_id=0
+            )
             success += 1
             await db_manager.select_status_for_user(user_id, "sended_practice")
             await asyncio.sleep(0.3)
